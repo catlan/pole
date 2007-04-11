@@ -101,6 +101,9 @@ class DirEntry
     unsigned prev;         // previous sibling
     unsigned next;         // next sibling
     unsigned child;        // first child
+
+    DirEntry(): valid(false), name(), dir(false), size(0), start(0),
+        prev(0), next(0), child(0) {}
 };
 
 class DirTree
@@ -240,18 +243,17 @@ static const unsigned char pole_magic[] =
 
 // =========== Header ==========
 
-Header::Header()
+Header::Header():
+  b_shift( 9 ),
+  s_shift( 6 ),
+  num_bat( 0 ),
+  dirent_start( 0 ),
+  threshold( 4096 ),
+  sbat_start( 0 ),
+  num_sbat( 0 ),
+  mbat_start( 0 ),
+  num_mbat( 0 )
 {
-  b_shift = 9;
-  s_shift = 6;
-  num_bat = 0;
-  dirent_start = 0;
-  threshold = 4096;
-  sbat_start = 0;
-  num_sbat = 0;
-  mbat_start = 0;
-  num_mbat = 0;
-
   for( unsigned i = 0; i < 8; i++ )
     id[i] = pole_magic[i];
   for( unsigned i=0; i<109; i++ )
@@ -340,9 +342,8 @@ const unsigned AllocTable::Eof = 0xfffffffe;
 const unsigned AllocTable::Bat = 0xfffffffd;
 const unsigned AllocTable::MetaBat = 0xfffffffc;
 
-AllocTable::AllocTable()
+AllocTable::AllocTable(): blockSize( 4096 ), data()
 {
-  blockSize = 4096;
   // initial size
   resize( 128 );
 }
@@ -475,7 +476,7 @@ void AllocTable::debug()
 
 const unsigned DirTree::End = 0xffffffff;
 
-DirTree::DirTree()
+DirTree::DirTree(): entries()
 {
   clear();
 }
@@ -793,19 +794,20 @@ void DirTree::debug()
 
 // =========== StorageIO ==========
 
-StorageIO::StorageIO( Storage* st, const char* fname )
+StorageIO::StorageIO( Storage* st, const char* fname ):
+  storage( st ),
+  filename( fname ),
+  file(),
+  result( Storage::Ok ),
+  opened( false ),
+  filesize( 0 ),
+  header( new Header() ),
+  dirtree( new DirTree() ),
+  bbat ( new AllocTable() ),
+  sbat ( new AllocTable() ),
+  sb_blocks(),
+  streams()
 {
-  storage = st;
-  filename = fname;
-  result = Storage::Ok;
-  opened = false;
-
-  header = new Header();
-  dirtree = new DirTree();
-  bbat = new AllocTable();
-  sbat = new AllocTable();
-
-  filesize = 0;
   bbat->blockSize = 1 << header->b_shift;
   sbat->blockSize = 1 << header->s_shift;
 }
@@ -1095,23 +1097,24 @@ unsigned long StorageIO::loadSmallBlock( unsigned long block,
 
 // =========== StreamIO ==========
 
-StreamIO::StreamIO( StorageIO* s, DirEntry* e)
+StreamIO::StreamIO( StorageIO* s, DirEntry* e ):
+  io( s ),
+  entry( e ),
+  fullName(),
+  eof( false ),
+  fail( false ),
+  blocks(),
+  m_pos( 0 ),
+  cache_data( 0 ),
+  cache_size( 4096 ), // optimal ?
+  cache_pos( 0 )
 {
-  io = s;
-  entry = e;
-  eof = false;
-  fail = false;
-
-  m_pos = 0;
-
   if( entry->size >= io->header->threshold )
     blocks = io->bbat->follow( entry->start );
   else
     blocks = io->sbat->follow( entry->start );
 
   // prepare cache
-  cache_pos = 0;
-  cache_size = 4096; // optimal ?
   cache_data = new unsigned char[cache_size];
   updateCache();
 }
@@ -1230,9 +1233,9 @@ void StreamIO::updateCache()
 
 // =========== Storage ==========
 
-Storage::Storage( const char* filename )
+Storage::Storage( const char* filename ):
+  io( new StorageIO( this, filename ) )
 {
-  io = new StorageIO( this, filename );
 }
 
 Storage::~Storage()
@@ -1279,9 +1282,9 @@ bool Storage::isDirectory( const std::string& name )
 
 // =========== Stream ==========
 
-Stream::Stream( Storage* storage, const std::string& name )
+Stream::Stream( Storage* storage, const std::string& name ):
+  io( storage->io->streamIO( name ) )
 {
-  io = storage->io->streamIO( name );
 }
 
 // FIXME tell parent we're gone
