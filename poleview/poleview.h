@@ -27,17 +27,12 @@
 #ifndef POLEVIEW
 #define POLEVIEW
 
-#include <qdialog.h>
-#include <q3mainwindow.h>
-//Added by qt3to4:
-#include <QLabel>
-class QLabel;
-class Q3ListView;
-class Q3TextEdit;
-
 #include "pole.h"
 
-class PoleView : public Q3MainWindow
+#include <QMainWindow>
+#include <QDialog>
+
+class PoleView : public QMainWindow
 {
   Q_OBJECT
 
@@ -56,10 +51,10 @@ class PoleView : public Q3MainWindow
     void aboutQt();
 
   private:
+    class Private;
+    Private* d;
     PoleView( const PoleView& );
     PoleView& operator=( const PoleView& );
-    POLE::Storage* storage;
-    Q3ListView* view;
 };
 
 
@@ -75,12 +70,11 @@ class StreamView: public QDialog
     void goTop();
 
   private:
+    class Private;
+    Private *d;
     StreamView( const StreamView& );
     StreamView& operator=( const StreamView& );
     void appendData( unsigned char* data, unsigned length );
-    POLE::Stream* stream;
-    QLabel* infoLabel;
-    Q3TextEdit* log;
 };
 
 #endif // POLEVIEW

@@ -27,6 +27,8 @@
 #include "poleview.h"
 #include "pole.h"
 
+#include <QMainWindow>
+
 #include <qaction.h>
 #include <qapplication.h>
 #include <qdatetime.h>
@@ -45,15 +47,23 @@
 //Added by qt3to4:
 #include <Q3VBoxLayout>
 
-PoleView::PoleView(): Q3MainWindow()
+class PoleView::Private
 {
-  storage = 0;
+public:
+    POLE::Storage* storage;
+    Q3ListView* view;
+};
 
-  view = new Q3ListView( this );
-  view->addColumn( tr("Name" ) );
-  view->addColumn( tr("Size" ) );
-  view->setColumnAlignment( 1, Qt::AlignRight );
-  setCentralWidget( view );
+PoleView::PoleView(): QMainWindow()
+{
+  d = new PoleView::Private;
+  d->storage = 0;
+
+  d->view = new Q3ListView( this );
+  d->view->addColumn( tr("Name" ) );
+  d->view->addColumn( tr("Size" ) );
+  d->view->setColumnAlignment( 1, Qt::AlignRight );
+  setCentralWidget( d->view );
 
   Q3PopupMenu * file = new Q3PopupMenu( this );
   menuBar()->insertItem( tr("&File"), file );
@@ -171,13 +181,13 @@ void visit( Q3ListViewItem* parent, POLE::Storage* storage, const std::string pa
 
 void PoleView::openFile( const QString &fileName )
 {
-  if( storage ) closeFile();
+  if( d->storage ) closeFile();
 
   QTime t; t.start();
-  storage = new POLE::Storage( fileName.latin1() );
-  storage->open();
+  d->storage = new POLE::Storage( fileName.latin1() );
+  d->storage->open();
 
-  if( storage->result() != POLE::Storage::Ok )
+  if( d->storage->result() != POLE::Storage::Ok )
   {
     QString msg = QString( tr("Unable to open file %1\nProbably it is not a compound document.") ).arg(fileName);
     QMessageBox::critical( 0, tr("Error"), msg );
@@ -188,29 +198,29 @@ void PoleView::openFile( const QString &fileName )
   QString msg = QString( tr("Loading %1 (%2 ms)") ).arg( fileName ).arg( t.elapsed() );
   statusBar()->message( msg, 2000 );
 
-  view->clear();
-  StreamItem* root = new StreamItem( view, tr("Root") );
-  visit( root, storage, "/" );
+  d->view->clear();
+  StreamItem* root = new StreamItem( d->view, tr("Root") );
+  visit( root, d->storage, "/" );
 
   setCaption( QString( tr("%1 - POLEView" ).arg( fileName ) ) );
 }
 
 void PoleView::closeFile()
 {
-  if( storage )
+  if( d->storage )
   {
-    storage->close();
-    delete storage;
+    d->storage->close();
+    delete d->storage;
   }
 
-  storage = 0;
-  view->clear();
+  d->storage = 0;
+  d->view->clear();
   setCaption( tr("POLEView" ) );
 }
 
 void PoleView::viewStream()
 {
-  StreamItem* item = (StreamItem*) view->selectedItem();
+  StreamItem* item = (StreamItem*) d->view->selectedItem();
   if( !item )
   {
     QMessageBox::warning( 0, tr("View Stream"),
@@ -236,7 +246,7 @@ void PoleView::viewStream()
 
 void PoleView::exportStream()
 {
-  StreamItem* item = (StreamItem*) view->selectedItem();
+  StreamItem* item = (StreamItem*) d->view->selectedItem();
   if( !item )
   {
     QMessageBox::warning( 0, tr("View Stream"),
@@ -296,9 +306,20 @@ void PoleView::aboutQt()
 
 #define STREAM_MAX_SIZE 32  // in KB
 
+class StreamView::Private
+{
+public:
+  POLE::Stream* stream;
+  QLabel* infoLabel;
+  Q3TextEdit* log;
+};
+
+
 StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
 {
-  stream = s;
+  d = new Private;
+  d->stream = s;
+
   setModal( false );
 
   Q3VBoxLayout* layout = new Q3VBoxLayout( this );
@@ -306,32 +327,32 @@ StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
   layout->setMargin( 10 );
   layout->setSpacing( 5 );
 
-  infoLabel = new QLabel( this );
+  d->infoLabel = new QLabel( this );
 
-  log = new Q3TextEdit( this );
-  log->setTextFormat( Qt::LogText );
-  log->setFont( QFont("Courier") );
-  log->setMinimumSize( 500, 300 );
+  d->log = new Q3TextEdit( this );
+  d->log->setTextFormat( Qt::LogText );
+  d->log->setFont( QFont("Courier") );
+  d->log->setMinimumSize( 500, 300 );
 
   QTimer::singleShot( 0, this, SLOT( loadStream() ) );
 }
 
 void StreamView::loadStream()
 {
-  unsigned size = stream->size();
+  unsigned size = d->stream->size();
 
   if( size > STREAM_MAX_SIZE*1024 )
   {
-    infoLabel->setText( tr("This stream is too large. "
+    d->infoLabel->setText( tr("This stream is too large. "
       "Only the first %1 KB is shown.").arg( STREAM_MAX_SIZE ) );
     size = STREAM_MAX_SIZE*1024;
   }
 
   unsigned char buffer[16];
-  stream->seek( 0 );
+  d->stream->seek( 0 );
   for( unsigned j = 0; j < size; j+= 16 )
   {
-    unsigned read = stream->read( buffer, 16 );
+    unsigned read = d->stream->read( buffer, 16 );
     appendData( buffer, read );
     if( read < sizeof( buffer ) ) break;
   }
@@ -341,7 +362,7 @@ void StreamView::loadStream()
 
 void StreamView::goTop()
 {
-  log->ensureVisible( 0, 0 );
+  d->log->ensureVisible( 0, 0 );
 }
 
 void StreamView::appendData( unsigned char* data, unsigned length )
@@ -367,7 +388,7 @@ void StreamView::appendData( unsigned char* data, unsigned length )
     else msg.append( '.' );
   }
 
-  log->append( msg );
+  d->log->append( msg );
 }
 
 // --- main program
