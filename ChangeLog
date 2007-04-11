@@ -1,0 +1,15 @@
+POLE 0.2 (released March 2005)
+
+        * changed license to BSD license
+        * poleview: graphical tool to view a structured storage
+        * fixed occasional incorrect reading of big file 
+        * fixed rare memory problem, found by valgrind
+        * fixed compile with Microsoft Visual C++ and Borland C++ (Windows)
+        * modified storage to become stateless (with better API)
+        * performance improvement, especially with very large file
+
+POLE 0.1 (released March 2004)
+
+        * initial release
+        * support for reading structured storages, even large ones
+        * no support yet for creating or modifying a storage
