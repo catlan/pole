@@ -32,7 +32,7 @@
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QMenu>
-
+#include <QTextEdit>
 
 #include <qdatetime.h>
 #include <qlabel.h>
@@ -356,7 +356,7 @@ class StreamView::Private
 public:
   POLE::Stream* stream;
   QLabel* infoLabel;
-  Q3TextEdit* log;
+  QTextEdit* log;
 };
 
 
@@ -374,8 +374,8 @@ StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
 
   d->infoLabel = new QLabel( this );
 
-  d->log = new Q3TextEdit( this );
-  d->log->setTextFormat( Qt::LogText );
+  d->log = new QTextEdit( this );
+  d->log->setReadOnly(true);
   d->log->setFont( QFont("Courier") );
   d->log->setMinimumSize( 500, 300 );
 
@@ -407,7 +407,7 @@ void StreamView::loadStream()
 
 void StreamView::goTop()
 {
-  d->log->ensureVisible( 0, 0 );
+  d->log->moveCursor( QTextCursor::Start );
 }
 
 void StreamView::appendData( unsigned char* data, unsigned length )
