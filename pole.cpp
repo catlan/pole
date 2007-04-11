@@ -876,6 +876,7 @@ void StorageIO::load()
   if( (header->num_bat > 109) && (header->num_mbat > 0) )
   {
     unsigned char* buffer2 = new unsigned char[ bbat->blockSize ];
+    memset(buffer2, 0, bbat->blockSize);
     unsigned k = 109;
     unsigned mblock = header->mbat_start;
     for( unsigned r = 0; r < header->num_mbat; r++ )
@@ -896,6 +897,7 @@ void StorageIO::load()
   if( buflen > 0 )
   {
     buffer = new unsigned char[ buflen ];
+    memset(buffer, 0, buflen);
     loadBigBlocks( blocks, buffer, buflen );
     bbat->load( buffer, buflen );
     delete[] buffer;
@@ -908,6 +910,7 @@ void StorageIO::load()
   if( buflen > 0 )
   {
     buffer = new unsigned char[ buflen ];
+    memset(buffer, 0, buflen);
     loadBigBlocks( blocks, buffer, buflen );
     sbat->load( buffer, buflen );
     delete[] buffer;
@@ -918,6 +921,7 @@ void StorageIO::load()
   blocks = bbat->follow( header->dirent_start );
   buflen = blocks.size()*bbat->blockSize;
   buffer = new unsigned char[ buflen ];
+  memset(buffer, 0, buflen);
   loadBigBlocks( blocks, buffer, buflen );
   dirtree->load( buffer, buflen );
   unsigned sb_start = readU32( buffer + 0x74 );
