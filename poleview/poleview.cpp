@@ -34,6 +34,7 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QTextEdit>
+#include <QToolBar>
 #include <QVBoxLayout>
 
 #include <qdatetime.h>
@@ -128,6 +129,13 @@ PoleView::PoleView(): QMainWindow()
   QMenu* helpMenu = menuBar()->addMenu( tr("&Help") );
   helpMenu->addAction( d->actions->helpAbout );
   helpMenu->addAction( d->actions->helpAboutQt );
+
+  QToolBar* mainToolBar = addToolBar( tr("&Main") );
+  mainToolBar->addAction( d->actions->fileOpen );
+  mainToolBar->addSeparator();
+  mainToolBar->addAction( d->actions->streamExport );
+  mainToolBar->addAction( d->actions->streamView );
+  mainToolBar->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
 
   resize( 400, 300 );
   setCaption( tr("POLEView" ) );
