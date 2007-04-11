@@ -33,6 +33,7 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QTextEdit>
+#include <QVBoxLayout>
 
 #include <qdatetime.h>
 #include <qlabel.h>
@@ -40,13 +41,9 @@
 #include <q3listview.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
-#include <q3popupmenu.h>
 #include <qstatusbar.h>
 #include <qstring.h>
-#include <q3textedit.h>
 #include <qtimer.h>
-//Added by qt3to4:
-#include <Q3VBoxLayout>
 
 class ActionPack
 {
@@ -367,8 +364,7 @@ StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
 
   setModal( false );
 
-  Q3VBoxLayout* layout = new Q3VBoxLayout( this );
-  layout->setAutoAdd( true );
+  QVBoxLayout* layout = new QVBoxLayout( this );
   layout->setMargin( 10 );
   layout->setSpacing( 5 );
 
@@ -378,6 +374,9 @@ StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
   d->log->setReadOnly(true);
   d->log->setFont( QFont("Courier") );
   d->log->setMinimumSize( 500, 300 );
+
+  layout->addWidget( d->infoLabel );
+  layout->addWidget( d->log );
 
   QTimer::singleShot( 0, this, SLOT( loadStream() ) );
 }
