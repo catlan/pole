@@ -29,12 +29,12 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QFileDialog>
 #include <QMainWindow>
 #include <QMenu>
 
 
 #include <qdatetime.h>
-#include <q3filedialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
 #include <q3listview.h>
@@ -169,7 +169,7 @@ void PoleView::choose()
   filter = filter.append( ";;" ).append( filter5 );
   filter = filter.append( ";;" ).append( filter6 );
 
-  QString fn = Q3FileDialog::getOpenFileName( QString::null, filter, this );
+  QString fn = QFileDialog::getOpenFileName(this, tr("Open File"), QString(), filter);
 
   if ( !fn.isEmpty() ) openFile( fn );
   else
@@ -309,8 +309,8 @@ void PoleView::exportStream()
     return;
   }
 
-  QString fn = Q3FileDialog::getSaveFileName( QString::null, QString::null,
-    0, 0, tr("Export Stream As") );
+  QString fn = QFileDialog::getSaveFileName(this, tr("Export Stream As"));
+
   if ( fn.isEmpty() )
   {
     statusBar()->message( tr("Export aborted"), 2000 );
