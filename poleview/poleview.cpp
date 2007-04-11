@@ -391,6 +391,8 @@ void StreamView::loadStream()
       "Only the first %1 KB is shown.").arg( STREAM_MAX_SIZE ) );
     size = STREAM_MAX_SIZE*1024;
   }
+  else
+    d->infoLabel->setText( tr("Size: %1 bytes").arg( size ) );
 
   unsigned char buffer[16];
   d->stream->seek( 0 );
