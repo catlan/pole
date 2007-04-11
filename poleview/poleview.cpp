@@ -6,10 +6,10 @@
     are met:
 
     1. Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
+       notice, this list of conditions and the following disclaimer.
     2. Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
 
     THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -27,16 +27,17 @@
 #include "poleview.h"
 #include "pole.h"
 
+#include <QAction>
+#include <QApplication>
 #include <QMainWindow>
+#include <QMenu>
 
-#include <qaction.h>
-#include <qapplication.h>
+
 #include <qdatetime.h>
 #include <q3filedialog.h>
 #include <qlabel.h>
 #include <qlayout.h>
 #include <q3listview.h>
-#include <q3mainwindow.h>
 #include <qmenubar.h>
 #include <qmessagebox.h>
 #include <q3popupmenu.h>
@@ -47,16 +48,63 @@
 //Added by qt3to4:
 #include <Q3VBoxLayout>
 
+class ActionPack
+{
+public:
+  QAction* fileNew;
+  QAction* fileOpen;
+  QAction* fileClose;
+  QAction* fileQuit;
+  QAction* streamExport;
+  QAction* streamView;
+  QAction* helpAbout;
+  QAction* helpAboutQt;
+
+  ActionPack( QObject* parent )
+  {
+    fileNew = new QAction( PoleView::tr("&New Window"), parent );
+    fileNew->setShortcut( PoleView::tr("Ctrl+N") );
+    QObject::connect( fileNew, SIGNAL(triggered()), parent, SLOT(newWindow() ) );
+
+    fileOpen = new QAction( PoleView::tr("&Open..."), parent );
+    fileOpen->setShortcut( PoleView::tr("Ctrl+O") );
+    QObject::connect( fileOpen, SIGNAL(triggered()), parent, SLOT(choose() ) );
+
+    fileClose = new QAction( PoleView::tr("&Close"), parent );
+    QObject::connect( fileClose, SIGNAL(triggered()), parent, SLOT(closeFile() ) );
+
+    fileQuit = new QAction( PoleView::tr("&Quit"), parent );
+    fileQuit->setShortcut( PoleView::tr("Ctrl+Q") );
+    QObject::connect( fileQuit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows() ) );
+
+    streamExport = new QAction( PoleView::tr("&Export..."), parent );
+    streamExport->setShortcut( PoleView::tr("Ctrl+E") );
+    QObject::connect( streamExport, SIGNAL(triggered()), parent, SLOT(exportStream() ) );
+
+    streamView = new QAction( PoleView::tr("&View..."), parent );
+    QObject::connect( streamView, SIGNAL(triggered()), parent, SLOT(viewStream() ) );
+
+    helpAbout = new QAction( PoleView::tr("&About..."), parent );
+    helpAbout->setShortcut( PoleView::tr("F1") );
+    QObject::connect( helpAbout, SIGNAL(triggered()), parent, SLOT(about() ) );
+
+    helpAboutQt = new QAction( PoleView::tr("About &Qt"), parent );
+    QObject::connect( helpAboutQt, SIGNAL(triggered()), parent, SLOT(aboutQt() ) );
+  }
+};
+
 class PoleView::Private
 {
 public:
-    POLE::Storage* storage;
-    Q3ListView* view;
+  POLE::Storage* storage;
+  Q3ListView* view;
+  ActionPack* actions;
 };
 
 PoleView::PoleView(): QMainWindow()
 {
   d = new PoleView::Private;
+  d->actions = new ActionPack(this);
   d->storage = 0;
 
   d->view = new Q3ListView( this );
@@ -65,23 +113,20 @@ PoleView::PoleView(): QMainWindow()
   d->view->setColumnAlignment( 1, Qt::AlignRight );
   setCentralWidget( d->view );
 
-  Q3PopupMenu * file = new Q3PopupMenu( this );
-  menuBar()->insertItem( tr("&File"), file );
-  file->insertItem( tr("&New Window"), this, SLOT(newWindow()), Qt::CTRL+Qt::Key_N );
-  file->insertItem( tr("&Open..."), this, SLOT(choose()), Qt::CTRL+Qt::Key_O );
-  file->insertItem( tr("&Close"), this, SLOT(closeFile()) );
-  file->insertSeparator();
-  file->insertItem( tr("&Quit"), qApp, SLOT( closeAllWindows() ), Qt::CTRL+Qt::Key_Q );
+  QMenu* fileMenu = menuBar()->addMenu( tr("&File") );
+  fileMenu->addAction( d->actions->fileNew );
+  fileMenu->addAction( d->actions->fileOpen );
+  fileMenu->addAction( d->actions->fileClose );
+  fileMenu->insertSeparator();
+  fileMenu->addAction( d->actions->fileQuit );
 
-  Q3PopupMenu * streamMenu = new Q3PopupMenu( this );
-  menuBar()->insertItem( tr("&Stream"), streamMenu );
-  streamMenu->insertItem( tr("&Export..."), this, SLOT(exportStream() ), Qt::CTRL+Qt::Key_E );
-  streamMenu->insertItem( tr("&View..."), this, SLOT(viewStream()) );
+  QMenu* streamMenu = menuBar()->addMenu( tr("&Stream") );
+  streamMenu->addAction( d->actions->streamExport );
+  streamMenu->addAction( d->actions->streamView );
 
-  Q3PopupMenu * help = new Q3PopupMenu( this );
-  menuBar()->insertItem( tr("&Help"), help );
-  help->insertItem( tr("&About"), this, SLOT(about()), Qt::Key_F1 );
-  help->insertItem( tr("About &Qt"), this, SLOT(aboutQt()) );
+  QMenu* helpMenu = menuBar()->addMenu( tr("&Help") );
+  helpMenu->addAction( d->actions->helpAbout );
+  helpMenu->addAction( d->actions->helpAboutQt );
 
   resize( 400, 300 );
   setCaption( tr("POLEView" ) );
