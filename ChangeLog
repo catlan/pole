@@ -1,8 +1,10 @@
 POLE 0.3 
+
         * changed license to two-clause BSD license
         * fixed potential lock-up on corrupted file, bug reported by 
           Andrew Ziem <ahziem1@mailbolt.com>
         * fixed error reading very huge file
+        * ported POLEView to Qt 4, making it available also for Windows
 
 POLE 0.2 (released March 2005)
 
