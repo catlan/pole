@@ -1,4 +1,5 @@
 POLE 0.3 
+        * changed license to two-clause BSD license
         * fixed potential lock-up on corrupted file, bug reported by 
           Andrew Ziem <ahziem1@mailbolt.com>
         * fixed error reading very huge file
