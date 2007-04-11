@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file>fileopen.png</file>
+  <file>streamexport.png</file>
+  <file>streamview.png</file>
+</qresource>
+</RCC>

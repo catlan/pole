@@ -30,6 +30,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QFileDialog>
+#include <QIcon>
 #include <QMainWindow>
 #include <QMenu>
 #include <QTextEdit>
@@ -65,6 +66,7 @@ public:
 
     fileOpen = new QAction( PoleView::tr("&Open..."), parent );
     fileOpen->setShortcut( PoleView::tr("Ctrl+O") );
+    fileOpen->setIcon( QIcon( ":/fileopen.png" ) );
     QObject::connect( fileOpen, SIGNAL(triggered()), parent, SLOT(choose() ) );
 
     fileClose = new QAction( PoleView::tr("&Close"), parent );
@@ -76,9 +78,11 @@ public:
 
     streamExport = new QAction( PoleView::tr("&Export..."), parent );
     streamExport->setShortcut( PoleView::tr("Ctrl+E") );
+    streamExport->setIcon( QIcon( ":/streamexport.png" ) );
     QObject::connect( streamExport, SIGNAL(triggered()), parent, SLOT(exportStream() ) );
 
     streamView = new QAction( PoleView::tr("&View..."), parent );
+    streamView->setIcon( QIcon( ":/streamview.png" ) );
     QObject::connect( streamView, SIGNAL(triggered()), parent, SLOT(viewStream() ) );
 
     helpAbout = new QAction( PoleView::tr("&About..."), parent );
@@ -337,8 +341,9 @@ void PoleView::exportStream()
 void PoleView::about()
 {
   QMessageBox::about( this, tr("About POLEView"),
-    tr("Simple structured storage viewer\n"
-    "Copyright (C) 2004 Ariya Hidayat (ariya@kde.org)"));
+    tr("Simple structured storage viewer\n\n"
+    "Copyright (C) 2004-2007 Ariya Hidayat (ariya@kde.org)\n\n"
+    "Icons are from Eclipse project (http://www.eclipse.org)"));
 }
 
 void PoleView::aboutQt()
