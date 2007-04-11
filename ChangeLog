@@ -1,6 +1,7 @@
 POLE 0.3 
         * fixed potential lock-up on corrupted file, bug reported by 
           Andrew Ziem <ahziem1@mailbolt.com>
+        * fixed error reading very huge file
 
 POLE 0.2 (released March 2005)
 
