@@ -1006,7 +1006,7 @@ unsigned long StorageIO::loadBigBlocks( std::vector<unsigned long> blocks,
 
   // read block one by one, seems fast enough
   unsigned long bytes = 0;
-  for( unsigned long i=0; (i < blocks.size() ) & ( bytes<maxlen ); i++ )
+  for( unsigned long i=0; (i < blocks.size() ) && ( bytes<maxlen ); i++ )
   {
     unsigned long block = blocks[i];
     unsigned long pos =  bbat->blockSize * ( block+1 );
@@ -1050,7 +1050,7 @@ unsigned long StorageIO::loadSmallBlocks( std::vector<unsigned long> blocks,
 
   // read small block one by one
   unsigned long bytes = 0;
-  for( unsigned long i=0; ( i<blocks.size() ) & ( bytes<maxlen ); i++ )
+  for( unsigned long i=0; ( i<blocks.size() ) && ( bytes<maxlen ); i++ )
   {
     unsigned long block = blocks[i];
 
