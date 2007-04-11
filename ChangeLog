@@ -1,3 +1,7 @@
+POLE 0.3 
+        * fixed potential lock-up on corrupted file, bug reported by 
+          Andrew Ziem <ahziem1@mailbolt.com>
+
 POLE 0.2 (released March 2005)
 
         * changed license to BSD license

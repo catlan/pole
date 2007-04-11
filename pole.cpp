@@ -392,26 +392,36 @@ void AllocTable::setChain( std::vector<unsigned long> chain )
   }
 }
 
-// follow 
+// TODO: optimize this with better search
+static bool already_exist(const std::vector<unsigned long>& chain,
+unsigned long item)
+{
+ for(unsigned i = 0; i < chain.size(); i++)
+   if(chain[i] == item) return true;
+
+ return false;
+}
+
+// follow
 std::vector<unsigned long> AllocTable::follow( unsigned long start )
 {
-  std::vector<unsigned long> chain;
+ std::vector<unsigned long> chain;
 
-  if( start >= count() ) return chain; 
+ if( start >= count() ) return chain;
 
-  unsigned long p = start;
-  while( p < count() )
-  {
-    if( p == (unsigned long)Eof ) break;
-    if( p == (unsigned long)Bat ) break;
-    if( p == (unsigned long)MetaBat ) break;
-    if( p >= count() ) break;
-    chain.push_back( p );
-    if( data[p] >= count() ) break;
-    p = data[ p ];
-  }
+ unsigned long p = start;
+ while( p < count() )
+ {
+   if( p == (unsigned long)Eof ) break;
+   if( p == (unsigned long)Bat ) break;
+   if( p == (unsigned long)MetaBat ) break;
+   if( already_exist(chain, p) ) break;
+   chain.push_back(p);
+   if( data[p] >= count() ) break;
+   p = data[ p ];
+ }
 
-  return chain;
+ return chain;
 }
 
 unsigned AllocTable::unused()
