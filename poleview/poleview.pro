@@ -1,10 +1,10 @@
 TEMPLATE = app
 TARGET = poleview
 
-HEADERS += pole.h
+HEADERS += ../pole.h
 HEADERS += poleview.h
 
-SOURCES += pole.cpp
+SOURCES += ../pole.cpp
 SOURCES += poleview.cpp
 
 CONFIG += qt
