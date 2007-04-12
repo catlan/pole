@@ -73,7 +73,6 @@ class StreamView: public QDialog
     Private *d;
     StreamView( const StreamView& );
     StreamView& operator=( const StreamView& );
-    void appendData( unsigned char* data, unsigned length );
 };
 
 #endif // POLEVIEW

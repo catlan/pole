@@ -403,6 +403,28 @@ StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
   QTimer::singleShot( 0, this, SLOT( loadStream() ) );
 }
 
+static QString hexView( unsigned char* data, unsigned length )
+{
+  QString msg;
+  for( unsigned i = 0; i < length; i++ )
+  {
+    QString s = QString::number( data[i], 16 );
+    while( s.length() < 2 ) s.prepend( '0' );
+    msg.append( s );
+    msg.append( ' ' );
+  }
+  msg.append( "   " );
+  for( unsigned i = 0; i < length; i++ )
+  {
+    if( (data[i]>31) && (data[i]<128) )
+      msg.append( data[i] );
+    else
+      msg.append( '.' );
+  }
+
+  return msg;
+}
+
 void StreamView::loadStream()
 {
   unsigned size = d->stream->size();
@@ -418,40 +440,15 @@ void StreamView::loadStream()
 
   unsigned char buffer[16];
   d->stream->seek( 0 );
+  QString text;
   for( unsigned j = 0; j < size; j+= 16 )
   {
     unsigned read = d->stream->read( buffer, 16 );
-    appendData( buffer, read );
+    text = text + hexView( buffer, read ) + '\n';
     if( read < sizeof( buffer ) ) break;
   }
-
+  d->log->setPlainText( text );
   d->log->moveCursor( QTextCursor::Start );
-}
-
-void StreamView::appendData( unsigned char* data, unsigned length )
-{
-  QString msg;
-  for( unsigned i = 0; i < length; i++ )
-  {
-    QString s = QString::number( data[i], 16 );
-    while( s.length() < 2 ) s.prepend( '0' );
-    msg.append( s );
-    msg.append( ' ' );
-  }
-  msg.append( "   " );
-  for( unsigned i = 0; i < length; i++ )
-  {
-    if( (data[i]>31) && (data[i]<128) )
-    {
-      if( data[i] == '<' ) msg.append( "&lt;" );
-      else if( data[i] == '>' ) msg.append( "&gt;" );
-      else if( data[i] == '&' ) msg.append( "&amp;" );
-      else msg.append( data[i] );
-    }
-    else msg.append( '.' );
-  }
-
-  d->log->append( msg );
 }
 
 // --- main program
