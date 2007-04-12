@@ -396,6 +396,7 @@ public:
 
 StreamView::StreamView( POLE::Stream* s ): QDialog( 0 )
 {
+  setWindowFlags( windowFlags() | Qt::Tool );
   d = new Private;
   d->stream = s;
 
