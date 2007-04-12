@@ -145,6 +145,10 @@ PoleView::PoleView(): QMainWindow()
   setWindowTitle( tr("POLEView" ) );
   statusBar()->showMessage( tr("Ready"), 5000 );
   updateGUI();
+
+  QStringList args = QApplication::arguments();
+  if( args.count() > 1 )
+    openFile( args[1] );
 }
 
 void PoleView::newWindow()
