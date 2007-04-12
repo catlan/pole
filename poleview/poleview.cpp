@@ -116,6 +116,7 @@ PoleView::PoleView(): QMainWindow()
   d->tree->setHeaderLabels( headers );
   d->tree->setUniformRowHeights( true );
   setCentralWidget( d->tree );
+  connect(d->tree, SIGNAL( itemSelectionChanged() ), this, SLOT( updateGUI() ) );
 
   QMenu* fileMenu = menuBar()->addMenu( tr("&File") );
   fileMenu->addAction( d->actions->fileNew );
@@ -142,6 +143,7 @@ PoleView::PoleView(): QMainWindow()
   resize( 400, 300 );
   setWindowTitle( tr("POLEView" ) );
   statusBar()->showMessage( tr("Ready"), 5000 );
+  updateGUI();
 }
 
 void PoleView::newWindow()
@@ -264,6 +266,7 @@ void PoleView::openFile( const QString &fileName )
   d->tree->resizeColumnToContents( 1 );
 
   setWindowTitle( QString( tr("%1 - POLEView" ).arg( fileName ) ) );
+  updateGUI();
 }
 
 void PoleView::closeFile()
@@ -366,6 +369,15 @@ void PoleView::about()
 void PoleView::aboutQt()
 {
   QMessageBox::aboutQt( this, tr("POLEView") );
+}
+
+void PoleView::updateGUI()
+{
+  QList<QTreeWidgetItem*> items = d->tree->selectedItems();
+  StreamItem* item = items.count() ? (StreamItem*)items[0] : 0;
+  bool ok = item ? item->stream : false;
+  d->actions->streamView->setEnabled( ok );
+  d->actions->streamExport->setEnabled( ok );
 }
 
 #define STREAM_MAX_SIZE 32  // in KB

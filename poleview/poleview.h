@@ -50,6 +50,8 @@ class PoleView : public QMainWindow
     void about();
     void aboutQt();
 
+    void updateGUI();
+
   private:
     class Private;
     Private* d;
