@@ -41,10 +41,9 @@
 #include <QTextEdit>
 #include <QTime>
 #include <QTimer>
+#include <QTreeWidget>
 #include <QToolBar>
 #include <QVBoxLayout>
-
-#include <q3listview.h>
 
 class ActionPack
 {
@@ -98,7 +97,7 @@ class PoleView::Private
 {
 public:
   POLE::Storage* storage;
-  Q3ListView* view;
+  QTreeWidget* tree;
   ActionPack* actions;
 };
 
@@ -108,11 +107,15 @@ PoleView::PoleView(): QMainWindow()
   d->actions = new ActionPack(this);
   d->storage = 0;
 
-  d->view = new Q3ListView( this );
-  d->view->addColumn( tr("Name" ) );
-  d->view->addColumn( tr("Size" ) );
-  d->view->setColumnAlignment( 1, Qt::AlignRight );
-  setCentralWidget( d->view );
+  QStringList headers;
+  headers << tr("Name");
+  headers << tr("Size");
+
+  d->tree = new QTreeWidget( this );
+  d->tree->setColumnCount( 2 );
+  d->tree->setHeaderLabels( headers );
+  d->tree->setUniformRowHeights( true );
+  setCentralWidget( d->tree );
 
   QMenu* fileMenu = menuBar()->addMenu( tr("&File") );
   fileMenu->addAction( d->actions->fileNew );
@@ -184,34 +187,37 @@ void PoleView::choose()
     statusBar()->message( tr("Loading aborted"), 2000 );
 }
 
-class StreamItem: public Q3ListViewItem
+class StreamItem: public QTreeWidgetItem
 {
 public:
-  StreamItem( Q3ListViewItem* parent, const QString& name, POLE::Stream* stream = 0 );
-  StreamItem( Q3ListView* parent, const QString& name  );
   QString name;
   POLE::Stream* stream;
+  StreamItem( QTreeWidgetItem* parent, const QString& n, POLE::Stream* s = 0 ):
+  QTreeWidgetItem( parent )
+  {
+    name = n;
+    stream = s;
+    if( stream )
+      setText( 1, QString::number( stream->size() ) );
+    setText( 0, n );
+    setTextAlignment( 0, Qt::AlignLeft );
+    setTextAlignment( 1, Qt::AlignRight );
+    setExpanded( true );
+  }
+
+  StreamItem( QTreeWidget* parent, const QString& n ):
+  QTreeWidgetItem( parent )
+  {
+    name = n;
+    stream = 0;
+    setText( 0, n );
+    setTextAlignment( 0, Qt::AlignLeft );
+    setTextAlignment( 1, Qt::AlignRight );
+    setExpanded( true );
+  }
 };
 
-StreamItem::StreamItem( Q3ListViewItem* parent, const QString& n, POLE::Stream* s ):
-Q3ListViewItem( parent, n )
-{
-  name = n;
-  stream = s;
-  if( stream )
-    setText( 1, QString::number( stream->size() ) );
-  setOpen( true );
-}
-
-StreamItem::StreamItem( Q3ListView* parent, const QString& n ):
-Q3ListViewItem( parent, n )
-{
-  name = n;
-  stream = 0;
-  setOpen( true );
-}
-
-void visit( Q3ListViewItem* parent, POLE::Storage* storage, const std::string path  )
+void visit( QTreeWidgetItem* parent, POLE::Storage* storage, const std::string path  )
 {
   std::list<std::string> entries;
   entries = storage->entries( path );
@@ -251,9 +257,11 @@ void PoleView::openFile( const QString &fileName )
   QString msg = QString( tr("Loading %1 (%2 ms)") ).arg( QFileInfo(fileName).fileName() ).arg( t.elapsed() );
   statusBar()->message( msg, 4000 );
 
-  d->view->clear();
-  StreamItem* root = new StreamItem( d->view, tr("Root") );
+  d->tree->clear();
+  StreamItem* root = new StreamItem( d->tree, tr("Root") );
   visit( root, d->storage, "/" );
+  d->tree->resizeColumnToContents( 0 );
+  d->tree->resizeColumnToContents( 1 );
 
   setCaption( QString( tr("%1 - POLEView" ).arg( fileName ) ) );
 }
@@ -267,13 +275,14 @@ void PoleView::closeFile()
   }
 
   d->storage = 0;
-  d->view->clear();
+  d->tree->clear();
   setCaption( tr("POLEView" ) );
 }
 
 void PoleView::viewStream()
 {
-  StreamItem* item = (StreamItem*) d->view->selectedItem();
+  QList<QTreeWidgetItem*> items = d->tree->selectedItems();
+  StreamItem* item = items.count() ? (StreamItem*)items[0] : 0;
   if( !item )
   {
     QMessageBox::warning( 0, tr("View Stream"),
@@ -299,7 +308,8 @@ void PoleView::viewStream()
 
 void PoleView::exportStream()
 {
-  StreamItem* item = (StreamItem*) d->view->selectedItem();
+  QList<QTreeWidgetItem*> items = d->tree->selectedItems();
+  StreamItem* item = items.count() ? (StreamItem*)items[0] : 0;
   if( !item )
   {
     QMessageBox::warning( 0, tr("Export Stream"),
