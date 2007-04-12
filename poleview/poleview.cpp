@@ -418,6 +418,7 @@ void StreamView::loadStream()
 
   unsigned char buffer[16];
   d->stream->seek( 0 );
+  d->log->append( "<pre>");
   for( unsigned j = 0; j < size; j+= 16 )
   {
     unsigned read = d->stream->read( buffer, 16 );
@@ -425,6 +426,7 @@ void StreamView::loadStream()
     if( read < sizeof( buffer ) ) break;
   }
 
+  d->log->append( "</pre>");
   d->log->moveCursor( QTextCursor::Start );
 }
 
