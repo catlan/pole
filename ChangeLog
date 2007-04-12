@@ -5,6 +5,7 @@ POLE 0.3
           Andrew Ziem <ahziem1@mailbolt.com>
         * fixed error reading very huge file
         * ported POLEView to Qt 4, making it available also for Windows
+        * assorted user-interface improvements in POLEView
 
 POLE 0.2 (released March 2005)
 

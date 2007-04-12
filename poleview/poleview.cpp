@@ -117,6 +117,7 @@ PoleView::PoleView(): QMainWindow()
   d->tree->setUniformRowHeights( true );
   setCentralWidget( d->tree );
   connect(d->tree, SIGNAL( itemSelectionChanged() ), this, SLOT( updateGUI() ) );
+  connect(d->tree, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int )  ), this, SLOT( viewStream() ) );
 
   QMenu* fileMenu = menuBar()->addMenu( tr("&File") );
   fileMenu->addAction( d->actions->fileNew );
@@ -288,18 +289,20 @@ void PoleView::viewStream()
   StreamItem* item = items.count() ? (StreamItem*)items[0] : 0;
   if( !item )
   {
-    QMessageBox::warning( 0, tr("View Stream"),
-      tr("Nothing is selected"),
-      QMessageBox::Ok, QMessageBox::NoButton );
+    if(sender() != d->tree)
+      QMessageBox::warning( 0, tr("View Stream"),
+        tr("Nothing is selected"),
+        QMessageBox::Ok, QMessageBox::NoButton );
     return;
   }
 
   QString name = item->text( 0 );
   if( !item->stream )
   {
-    QMessageBox::warning( 0, tr("View Stream"),
-      tr("'%1' is not a stream").arg( name ),
-      QMessageBox::Ok, QMessageBox::NoButton );
+    if(sender() != d->tree)
+      QMessageBox::warning( 0, tr("View Stream"),
+        tr("'%1' is not a stream").arg( name ),
+        QMessageBox::Ok, QMessageBox::NoButton );
     return;
   }
 
