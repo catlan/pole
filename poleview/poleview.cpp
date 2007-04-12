@@ -30,22 +30,21 @@
 #include <QAction>
 #include <QApplication>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QIcon>
+#include <QLabel>
 #include <QMainWindow>
+#include <QMenuBar>
 #include <QMenu>
+#include <QMessageBox>
+#include <QStatusBar>
 #include <QTextEdit>
+#include <QTime>
+#include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
 
-#include <qdatetime.h>
-#include <qlabel.h>
-#include <qlayout.h>
 #include <q3listview.h>
-#include <qmenubar.h>
-#include <qmessagebox.h>
-#include <qstatusbar.h>
-#include <qstring.h>
-#include <qtimer.h>
 
 class ActionPack
 {
@@ -249,8 +248,8 @@ void PoleView::openFile( const QString &fileName )
     return;
   }
 
-  QString msg = QString( tr("Loading %1 (%2 ms)") ).arg( fileName ).arg( t.elapsed() );
-  statusBar()->message( msg, 2000 );
+  QString msg = QString( tr("Loading %1 (%2 ms)") ).arg( QFileInfo(fileName).fileName() ).arg( t.elapsed() );
+  statusBar()->message( msg, 4000 );
 
   d->view->clear();
   StreamItem* root = new StreamItem( d->view, tr("Root") );
@@ -303,7 +302,7 @@ void PoleView::exportStream()
   StreamItem* item = (StreamItem*) d->view->selectedItem();
   if( !item )
   {
-    QMessageBox::warning( 0, tr("View Stream"),
+    QMessageBox::warning( 0, tr("Export Stream"),
       tr("Nothing is selected"),
       QMessageBox::Ok, QMessageBox::NoButton );
     return;
@@ -416,11 +415,6 @@ void StreamView::loadStream()
     if( read < sizeof( buffer ) ) break;
   }
 
-  QTimer::singleShot( 100, this, SLOT( goTop() ) );
-}
-
-void StreamView::goTop()
-{
   d->log->moveCursor( QTextCursor::Start );
 }
 

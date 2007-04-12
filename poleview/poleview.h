@@ -67,7 +67,6 @@ class StreamView: public QDialog
 
   private slots:
     void loadStream();
-    void goTop();
 
   private:
     class Private;
