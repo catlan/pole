@@ -121,7 +121,7 @@ PoleView::PoleView(): QMainWindow()
   fileMenu->addAction( d->actions->fileNew );
   fileMenu->addAction( d->actions->fileOpen );
   fileMenu->addAction( d->actions->fileClose );
-  fileMenu->insertSeparator();
+  fileMenu->addSeparator();
   fileMenu->addAction( d->actions->fileQuit );
 
   QMenu* streamMenu = menuBar()->addMenu( tr("&Stream") );
@@ -140,8 +140,8 @@ PoleView::PoleView(): QMainWindow()
   mainToolBar->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
 
   resize( 400, 300 );
-  setCaption( tr("POLEView" ) );
-  statusBar()->message( tr("Ready"), 5000 );
+  setWindowTitle( tr("POLEView" ) );
+  statusBar()->showMessage( tr("Ready"), 5000 );
 }
 
 void PoleView::newWindow()
@@ -184,7 +184,7 @@ void PoleView::choose()
 
   if ( !fn.isEmpty() ) openFile( fn );
   else
-    statusBar()->message( tr("Loading aborted"), 2000 );
+    statusBar()->showMessage( tr("Loading aborted"), 2000 );
 }
 
 class StreamItem: public QTreeWidgetItem
@@ -243,7 +243,7 @@ void PoleView::openFile( const QString &fileName )
   if( d->storage ) closeFile();
 
   QTime t; t.start();
-  d->storage = new POLE::Storage( fileName.latin1() );
+  d->storage = new POLE::Storage( fileName.toLocal8Bit() );
   d->storage->open();
 
   if( d->storage->result() != POLE::Storage::Ok )
@@ -255,7 +255,7 @@ void PoleView::openFile( const QString &fileName )
   }
 
   QString msg = QString( tr("Loading %1 (%2 ms)") ).arg( QFileInfo(fileName).fileName() ).arg( t.elapsed() );
-  statusBar()->message( msg, 4000 );
+  statusBar()->showMessage( msg, 4000 );
 
   d->tree->clear();
   StreamItem* root = new StreamItem( d->tree, tr("Root") );
@@ -263,7 +263,7 @@ void PoleView::openFile( const QString &fileName )
   d->tree->resizeColumnToContents( 0 );
   d->tree->resizeColumnToContents( 1 );
 
-  setCaption( QString( tr("%1 - POLEView" ).arg( fileName ) ) );
+  setWindowTitle( QString( tr("%1 - POLEView" ).arg( fileName ) ) );
 }
 
 void PoleView::closeFile()
@@ -276,7 +276,7 @@ void PoleView::closeFile()
 
   d->storage = 0;
   d->tree->clear();
-  setCaption( tr("POLEView" ) );
+  setWindowTitle( tr("POLEView" ) );
 }
 
 void PoleView::viewStream()
@@ -302,7 +302,7 @@ void PoleView::viewStream()
 
   StreamView* sv = new StreamView( item->stream );
 
-  sv->setCaption( name );
+  sv->setWindowTitle( name );
   QTimer::singleShot( 200, sv, SLOT( show() ) );
 }
 
@@ -331,7 +331,7 @@ void PoleView::exportStream()
 
   if ( fn.isEmpty() )
   {
-    statusBar()->message( tr("Export aborted"), 2000 );
+    statusBar()->showMessage( tr("Export aborted"), 2000 );
     return;
   }
 
@@ -344,15 +344,15 @@ void PoleView::exportStream()
     return;
   }
 
-  statusBar()->message( tr("Exporting... Please wait") );
+  statusBar()->showMessage( tr("Exporting... Please wait") );
   for( ;; )
   {
       unsigned read = item->stream->read( buffer, sizeof( buffer ) );
-      outf.writeBlock( (const char*)buffer, read  );
+      outf.write( (const char*)buffer, read  );
       if( read < sizeof( buffer ) ) break;
   }
   outf.close();
-  statusBar()->message( tr("Stream is exported."), 2000 );
+  statusBar()->showMessage( tr("Stream is exported."), 2000 );
 }
 
 void PoleView::about()
