@@ -88,6 +88,12 @@ namespace POLE
          */
         bool isDirectory( const std::string& name );
         
+        DirTree* dirTree();
+        
+        StorageIO* storageIO();
+        
+        std::list<DirEntry *> dirEntries( const std::string& path = "/" );
+        
         /**
          * Finds and returns a stream with the specified name.
          * If reuse is true, this function returns the already created stream

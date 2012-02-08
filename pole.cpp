@@ -1107,6 +1107,33 @@ bool Storage::isDirectory( const std::string& name )
     return e ? e->dir : false;
 }
 
+DirTree* Storage::dirTree()
+{
+    return io->dirtree;
+}
+
+
+StorageIO* Storage::storageIO()
+{
+    return io;
+}
+
+std::list<DirEntry*> Storage::dirEntries( const std::string& path )
+{
+    std::list<DirEntry*> result;
+    DirTree* dt = io->dirtree;
+    DirEntry* e = dt->entry( path, false );
+    if( e  && e->dir )
+    {
+        unsigned parent = dt->indexOf( e );
+        std::vector<unsigned> children = dt->children( parent );
+        for( unsigned i = 0; i < children.size(); i++ )
+            result.push_back( dt->entry( children[i] ) );
+    }
+    
+    return result;
+}
+
 // =========== Stream ==========
 
 Stream::Stream( Storage* storage, const std::string& name ):
