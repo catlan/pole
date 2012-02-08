@@ -56,7 +56,7 @@ namespace POLE
         /**
          * Constructs a storage with name filename.
          **/
-        Storage( const char* filename );
+        Storage( char* bytes, unsigned long length );
         
         /**
          * Destroys the storage.

@@ -622,10 +622,10 @@ void DirTree::debug()
 
 // =========== StorageIO ==========
 
-StorageIO::StorageIO( Storage* st, const char* fname ):
+StorageIO::StorageIO( Storage* st, char* bytes, unsigned long length ):
 storage( st ),
-filename( fname ),
-file(),
+filedata((unsigned char *)bytes),
+dataLength(length),
 result( Storage::Ok ),
 opened( false ),
 filesize( 0 ),
@@ -667,17 +667,19 @@ void StorageIO::load()
     
     // open the file, check for error
     result = Storage::OpenFailed;
-    file.open( filename.c_str(), std::ios::binary | std::ios::in );
-    if( !file.good() ) return;
+    //FSTREAM file.open( filename.c_str(), std::ios::binary | std::ios::in );
+    //FSTREAM if( !file.good() ) return;
     
     // find size of input file
-    file.seekg( 0, std::ios::end );
-    filesize = file.tellg();
+    //FSTREAM file.seekg( 0, std::ios::end );
+    //FSTREAM filesize = file.tellg();
+    filesize = dataLength;
     
     // load header
     buffer = new unsigned char[512];
-    file.seekg( 0 );
-    file.read( (char*)buffer, 512 );
+    //FSTREAM file.seekg( 0 );
+    //FSTREAM file.read( (char*)buffer, 512 );
+    memcpy(buffer, filedata, 512);
     header->load( buffer );
     delete[] buffer;
     
@@ -777,13 +779,13 @@ void StorageIO::create()
 {
     // std::cout << "Creating " << filename << std::endl;
     
-    file.open( filename.c_str(), std::ios::out|std::ios::binary );
+    /*FSTREAM file.open( filename.c_str(), std::ios::out|std::ios::binary );
     if( !file.good() )
     {
         std::cerr << "Can't create " << filename << std::endl;
         result = Storage::OpenFailed;
         return;
-    }
+    }*/
     
     // so far so good
     opened = true;
@@ -803,7 +805,7 @@ void StorageIO::close()
 {
     if( !opened ) return;
     
-    file.close();
+    //FSTREAM file.close();
     opened = false;
     
     std::list<Stream*>::iterator it;
@@ -834,7 +836,6 @@ unsigned long StorageIO::loadBigBlocks( std::vector<unsigned long> blocks,
 {
     // sentinel
     if( !data ) return 0;
-    if( !file.good() ) return 0;
     if( blocks.size() < 1 ) return 0;
     if( maxlen == 0 ) return 0;
     
@@ -846,8 +847,9 @@ unsigned long StorageIO::loadBigBlocks( std::vector<unsigned long> blocks,
         unsigned long pos =  bbat->blockSize * ( block+1 );
         unsigned long p = (bbat->blockSize < maxlen-bytes) ? bbat->blockSize : maxlen-bytes;
         if( pos + p > filesize ) p = filesize - pos;
-        file.seekg( pos );
-        file.read( (char*)data + bytes, p );
+        //FSTREAM file.seekg( pos );
+        //FSTREAM file.read( (char*)data + bytes, p );
+        memcpy((char*)data + bytes, filedata + pos, p);
         bytes += p;
     }
     
@@ -859,7 +861,6 @@ unsigned long StorageIO::loadBigBlock( unsigned long block,
 {
     // sentinel
     if( !data ) return 0;
-    if( !file.good() ) return 0;
     
     // wraps call for loadBigBlocks
     std::vector<unsigned long> blocks;
@@ -875,7 +876,6 @@ unsigned long StorageIO::loadSmallBlocks( std::vector<unsigned long> blocks,
 {
     // sentinel
     if( !data ) return 0;
-    if( !file.good() ) return 0;
     if( blocks.size() < 1 ) return 0;
     if( maxlen == 0 ) return 0;
     
@@ -913,7 +913,6 @@ unsigned long StorageIO::loadSmallBlock( unsigned long block,
 {
     // sentinel
     if( !data ) return 0;
-    if( !file.good() ) return 0;
     
     // wraps call for loadSmallBlocks
     std::vector<unsigned long> blocks;
@@ -1061,8 +1060,8 @@ void StreamIO::updateCache()
 
 // =========== Storage ==========
 
-Storage::Storage( const char* filename ):
-io( new StorageIO( this, filename ) )
+Storage::Storage( char* bytes, unsigned long length ):
+io( new StorageIO( this, bytes, length ) )
 {
 }
 
