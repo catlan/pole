@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <unordered_set>
 
 #include "pole.h"
 
@@ -222,16 +223,6 @@ void AllocTable::setChain( std::vector<unsigned long> chain )
     }
 }
 
-// TODO: optimize this with better search
-static bool already_exist(const std::vector<unsigned long>& chain,
-                          unsigned long item)
-{
-    for(unsigned i = 0; i < chain.size(); i++)
-        if(chain[i] == item) return true;
-    
-    return false;
-}
-
 // follow
 std::vector<unsigned long> AllocTable::follow( unsigned long start )
 {
@@ -239,15 +230,19 @@ std::vector<unsigned long> AllocTable::follow( unsigned long start )
     
     if( start >= count() ) return chain;
     
+    std::unordered_set<unsigned long> cache_set;
     unsigned long p = start;
     while( p < count() )
     {
         if( p == (unsigned long)Eof ) break;
         if( p == (unsigned long)Bat ) break;
         if( p == (unsigned long)MetaBat ) break;
-        if( already_exist(chain, p) ) break;
+        if(cache_set.find(p) != cache_set.end()) break;
+
         chain.push_back(p);
         if( data[p] >= count() ) break;
+
+        cache_set.insert(p);
         p = data[ p ];
     }
     
